@@ -1,6 +1,6 @@
-# GeometricAnalyzer
+# Geometric Analyzer
 
-GeometricAnalyzer provides implementations of four different algorithms for finding the convex hull of a set of points in a 2D plane. The convex hull is the smallest convex polygon that encloses all the given points. The implemented algorithms include Jarvis March, Graham Scan, Quick Hull, and Brute Force approach.
+Geometric Analyzer provides implementations of four different algorithms for finding the convex hull of a set of points in a 2D plane. The convex hull is the smallest convex polygon that encloses all the given points. The implemented algorithms include Jarvis March, Graham Scan, Quick Hull, and Brute Force approach.
 
 ## Features
 

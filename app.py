@@ -23,18 +23,30 @@ def main():
     if option == 'Enter Points Individually':
         
         st.header('Enter Points Individually')
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)  
 
         with col1:
             x_input = st.text_input('Enter X coordinate:')
             y_input = st.text_input('Enter Y coordinate:')
+            
+            point_col, clear_col = st.columns(2)
+            with point_col:
+                if st.button('Add Point'):
+                    try:
+                        x = float(x_input) if x_input else 0.0
+                        y = float(y_input) if y_input else 0.0
+                        st.session_state.x_points.append(x)
+                        st.session_state.y_points.append(y)
+                        st.success(f'Point ({x}, {y}) added.')
+                    except ValueError:
+                        st.error('Invalid input. Please enter valid numerical values for X and Y coordinates.')
 
-            if st.button('Add Point'):
-                x = float(x_input) if x_input else 0.0
-                y = float(y_input) if y_input else 0.0
-                st.session_state.x_points.append(x)
-                st.session_state.y_points.append(y)
-                st.success(f'Point ({x}, {y}) added.')
+            with clear_col:                
+                if st.button('Clear Points'):
+                    st.session_state.x_points = []
+                    st.session_state.y_points = []
+                    st.success('Points cleared.')
+
 
         with col2:
             st.subheader('Added Points:')
@@ -42,7 +54,9 @@ def main():
             st.table(points_df)
 
         if st.button(f'Draw {algo}'):
-            plot_graph(st.session_state.x_points, st.session_state.y_points)
+            if st.button('Draw Convex Hull'):
+                points = np.column_stack((st.session_state.x_points, st.session_state.y_points))
+                draw_convex_hull(points)
         
     elif option == 'Generate Random Points':
         st.header('Generate Random Points')
@@ -50,10 +64,11 @@ def main():
         min_range = st.number_input('Enter minimum value:', value=0)
         max_range = st.number_input('Enter maximum value:', value=10)
 
-        if st.button(f'Draw {algo}'):
-            random_points_x = np.random.uniform(min_range, max_range, num_points)
-            random_points_y = np.random.uniform(min_range, max_range, num_points)
-            plot_graph(random_points_x, random_points_y)
+        random_points_x = np.random.uniform(min_range, max_range, num_points)
+        random_points_y = np.random.uniform(min_range, max_range, num_points)
+        if st.button('Draw Convex Hull'):
+            points = np.column_stack((random_points_x, random_points_y))
+            draw_convex_hull(points)
 
     elif option == 'Add Points from CSV':
         st.header('Add Points from CSV')
@@ -64,8 +79,18 @@ def main():
             csv_points_x = df.get('x', [])
             csv_points_y = df.get('y', [])
 
-            if st.button(f'Draw {algo}'):
-                plot_graph(csv_points_x, csv_points_y)
+        if st.button('Draw Convex Hull'):
+            points = np.column_stack((csv_points_x, csv_points_y))
+            draw_convex_hull(points)
+
+def draw_convex_hull(points):
+    algo = st.selectbox('Choose Convex Hull Algorithm:', ('Jarvis March', 'Graham Scan', 'QuickHull'))
+    
+    if algo == 'Jarvis March':
+        jm = JarvisMarch(points=points)
+        hull_points = jm()
+        fig = jm.plot_step_by_step()
+        st.plotly_chart(fig, use_container_width=True)
 
 if __name__ == "__main__":
     main()

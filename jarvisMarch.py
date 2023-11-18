@@ -1,9 +1,12 @@
 from base import ConvexHull
 import matplotlib.pyplot as plt
+import streamlit as st
+import plotly.graph_objects as go
+import plotly.express as px
 
 class JarvisMarch(ConvexHull):
-    def __init__(self, points=None, max_x=100, max_y=100, n=100):
-        super().__init__(points, max_x, max_y, n)
+    def __init__(self, points=None, max_x=100, max_y=100):
+        super().__init__(points, max_x, max_y, len(points))
         self.hull = None
         self.hull_points = None
         
@@ -46,23 +49,40 @@ class JarvisMarch(ConvexHull):
         plt.show()
         
     def plot_step_by_step(self):
-        plt.ion()  
-        fig, ax = plt.subplots()
+        fig = px.scatter(x=self.points[:, 0], y=self.points[:, 1], labels={'x': 'X-coordinate', 'y': 'Y-coordinate'},
+                        title='Convex Hull Construction', template='plotly')
 
-        plt.scatter(self.points[:, 0], self.points[:, 1], label='Points')
-        plt.title('Jarvis March - Convex Hull Construction')
-
+        frames = []
         for i in range(len(self.hull)):
             current_point = self.points[self.hull[i]]
             next_point = self.points[self.hull[(i + 1) % len(self.hull)]]
 
-            plt.plot([current_point[0], next_point[0]], [current_point[1], next_point[1]], 'r')
-            plt.scatter(current_point[0], current_point[1], color='blue', marker='o', s=100, label='Hull Points')
+            frame = go.Frame(
+                data=[
+                    go.Scatter(x=[current_point[0], next_point[0]], y=[current_point[1], next_point[1]],
+                            mode='lines', line=dict(color='red'), showlegend=False),
+                    go.Scatter(x=[current_point[0]], y=[current_point[1]],
+                            mode='markers', marker=dict(color='blue', size=10), showlegend=False)
+                ],
+                name=f"Frame {i + 1}"
+            )
+            frames.append(frame)
 
-            plt.pause(0.5) 
+        fig.frames = frames
 
-        plt.ioff()
-        plt.show()
+        # Add a play button and adjust animation settings
+        fig.update_layout(updatemenus=[dict(type='buttons', showactive=False, buttons=[dict(label='Play',
+                                        method='animate', args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])])
+
+        # Set the initial frame
+        fig.update_layout(updatemenus=[dict(type='buttons', showactive=False, buttons=[dict(label='Play',
+                                        method='animate', args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])],
+                        sliders=[dict(steps=[dict(args=['frame', dict(value=0)]), dict(args=['frame', dict(value=len(self.hull) - 1)])],
+                                        active=0, pad=dict(t=0, l=0.1))])
+
+        return fig
+
+
         
     def __call__(self):
         self.jarvisMarch()

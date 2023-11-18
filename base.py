@@ -4,6 +4,7 @@ import time
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 class ConvexHull:
     def __init__(self, points=None, max_x=100, max_y=100, n=10):

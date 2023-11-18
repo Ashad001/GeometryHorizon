@@ -1,0 +1,40 @@
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore the virtual environment
+venv/
+env/
+
+# Ignore the build directory
+build/
+
+# Ignore the distribution directory
+dist/
+
+# Ignore the egg-info directory
+*.egg-info/
+
+# Ignore any local configuration files
+*.env
+*.env.*
+.env/
+
+# Ignore any logs or temporary files
+*.log
+*.swp
+*.swo
+*.tmp
+*.bak
+*.pyo
+*.~
+
+# Ignore any IDE-specific files or directories
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.pydevproject
+
+# Ignore any package dependencies
+# Add any additional patterns for package managers like pip, poetry, etc.

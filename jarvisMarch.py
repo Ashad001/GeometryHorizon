@@ -49,39 +49,36 @@ class JarvisMarch(ConvexHull):
         plt.show()
         
     def plot_step_by_step(self):
-        fig = px.scatter(x=self.points[:, 0], y=self.points[:, 1], labels={'x': 'X-coordinate', 'y': 'Y-coordinate'},
-                        title='Convex Hull Construction', template='plotly')
-
+        fig = go.Figure()
         frames = []
+
         for i in range(len(self.hull)):
             current_point = self.points[self.hull[i]]
             next_point = self.points[self.hull[(i + 1) % len(self.hull)]]
 
-            frame = go.Frame(
-                data=[
-                    go.Scatter(x=[current_point[0], next_point[0]], y=[current_point[1], next_point[1]],
-                            mode='lines', line=dict(color='red'), showlegend=False),
-                    go.Scatter(x=[current_point[0]], y=[current_point[1]],
-                            mode='markers', marker=dict(color='blue', size=10), showlegend=False)
-                ],
-                name=f"Frame {i + 1}"
-            )
-            frames.append(frame)
+            frame_data = [
+                go.Scatter(x=self.points[:, 0], y=self.points[:, 1], mode='markers', marker=dict(color='blue', size=10),
+                        showlegend=False),
+                go.Scatter(x=[current_point[0], next_point[0]], y=[current_point[1], next_point[1]],
+                        mode='lines', line=dict(color='red'), showlegend=False)
+            ]
+
+            fig.add_trace(frame_data[0])
+            fig.add_trace(frame_data[1])
+
+            frames.append(go.Frame(data=frame_data, name=f"Frame {i + 1}"))
 
         fig.frames = frames
 
-        # Add a play button and adjust animation settings
-        fig.update_layout(updatemenus=[dict(type='buttons', showactive=False, buttons=[dict(label='Play',
-                                        method='animate', args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])])
-
-        # Set the initial frame
-        fig.update_layout(updatemenus=[dict(type='buttons', showactive=False, buttons=[dict(label='Play',
-                                        method='animate', args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])],
-                        sliders=[dict(steps=[dict(args=['frame', dict(value=0)]), dict(args=['frame', dict(value=len(self.hull) - 1)])],
-                                        active=0, pad=dict(t=0, l=0.1))])
+        fig.update_layout(updatemenus=[dict(type='buttons', showactive=False,
+                                            buttons=[dict(label='Play',
+                                                        method='animate',
+                                                        args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])],
+                        sliders=[dict(steps=[dict(args=['frame', dict(value=0)]),
+                                            dict(args=['frame', dict(value=len(self.hull) - 1)])],
+                                    active=0, pad=dict(t=0, l=0.1))])
 
         return fig
-
 
         
     def __call__(self):

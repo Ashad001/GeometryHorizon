@@ -2,17 +2,16 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from jarvisMarch import JarvisMarch
 
+from jarvisMarch import JarvisMarch
+from grhamScan import GrahamScan
 
 def plot_graph(x, y):
     fig, ax = plt.subplots()
     ax.scatter(x, y, color="blue")
     st.pyplot(fig)
 
-
 algo = "Jarvis March"
-
 
 def main():
     st.title("Convex Hull Visualizer")
@@ -31,6 +30,7 @@ def main():
         input_col, table_col = st.columns(2)
 
         with input_col:
+            st.subheader("Enter Coordinates")
             x_input = st.text_input("Enter X coordinate:")
             y_input = st.text_input("Enter Y coordinate:")
 
@@ -55,49 +55,65 @@ def main():
                     st.success("Points cleared.")
 
         with table_col:
-            st.subheader("Added Points:")
             points_df = pd.DataFrame(
                 list(zip(st.session_state.x_points, st.session_state.y_points)),
                 columns=["X", "Y"],
             )
-            st.table(points_df)
+            st.subheader("Added Points:")
+            st.dataframe(points_df, height=200, width=800)
+            
 
-        if st.button(f"Draw {algo}"):
-            if st.button("Draw Convex Hull"):
-                points = np.column_stack(
-                    (st.session_state.x_points, st.session_state.y_points)
-                )
-                draw_convex_hull(points)
 
     elif option == "Generate Random Points":
         st.header("Generate Random Points")
-        num_points = st.number_input(
-            "Enter the number of points:", min_value=1, value=5, step=1
-        )
-        min_range = st.number_input("Enter minimum value:", value=0)
-        max_range = st.number_input("Enter maximum value:", value=10)
+        point_col, table_col = st.columns(2)
+        with point_col:
+            num_points = st.number_input(
+                "Enter the number of points:", min_value=1, value=5, step=1
+            )
+            min_range = st.number_input("Enter minimum value:", value=0)
+            max_range = st.number_input("Enter maximum value:", value=10)
+            if st.button("Generate Points"):
+                st.session_state.x_points = np.random.uniform(min_range, max_range, num_points)
+                st.session_state.y_points = np.random.uniform(min_range, max_range, num_points)
+            
+        with table_col:
+            points_df = pd.DataFrame(
+                list(zip(st.session_state.x_points, st.session_state.y_points)),
+                columns=["X", "Y"],
+            )
 
-        random_points_x = np.random.uniform(min_range, max_range, num_points)
-        random_points_y = np.random.uniform(min_range, max_range, num_points)
-        if st.button("Draw Convex Hull"):
-            points = np.column_stack((random_points_x, random_points_y))
-            draw_convex_hull(points)
+            st.subheader("Added Points:")
+            st.dataframe(points_df, height=200, width=800)
 
+            
     elif option == "Add Points from CSV":
         st.header("Add Points from CSV")
-        uploaded_file = st.file_uploader("Upload a CSV file:", type=["csv"])
+        point_col, table_col = st.columns(2)
+        
+        with point_col:
+            st.subheader("Upload CSV file")
+            uploaded_file = st.file_uploader("CSV", type=["csv"])
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+                st.session_state.x_points = df.get("x", [])
+                st.session_state.y_points = df.get("y", [])
 
-        if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
-            csv_points_x = df.get("x", [])
-            csv_points_y = df.get("y", [])
+        with table_col: 
+            points_df = pd.DataFrame(
+                list(zip(st.session_state.x_points, st.session_state.y_points)),
+                columns=["X", "Y"],
+            )
 
-        if st.button("Draw Convex Hull"):
-            points = np.column_stack((csv_points_x, csv_points_y))
-            draw_convex_hull(points)
+            st.subheader("Added Points:")
+            st.dataframe(points_df, height=200, width=800)
+            
+    st.header("Create Convex Hull")    
+    draw_convex_hull()
 
 
-def draw_convex_hull(points):
+def draw_convex_hull():
+    points = np.column_stack((st.session_state.x_points, st.session_state.y_points))
     algo = st.selectbox(
         "Choose Convex Hull Algorithm:",
         ("Jarvis March", "Graham Scan", "QuickHull", "Brute Force"),
@@ -108,7 +124,12 @@ def draw_convex_hull(points):
         hull_points = jm()
         fig = jm.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
+        
     elif algo == "Graham Scan":
+        gs = GrahamScan(points=points)
+        hull_points = gs()
+        fig = gs.plot_step_by_step()
+        st.plotly_chart(fig, use_container_width=True)
         pass
     elif algo == "QuickHull":
         pass

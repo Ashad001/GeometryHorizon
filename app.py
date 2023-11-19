@@ -5,15 +5,21 @@ import matplotlib.pyplot as plt
 
 from jarvisMarch import JarvisMarch
 from grhamScan import GrahamScan
+from quickHull import QuickHull
+from bruteForce import BruteForce
+
 
 def plot_graph(x, y):
     fig, ax = plt.subplots()
     ax.scatter(x, y, color="blue")
     st.pyplot(fig)
 
+
 algo = "Jarvis March"
 
-def main():
+
+def convex_hull_page():
+    st.empty()
     st.title("Convex Hull Visualizer")
     option = st.selectbox(
         "Choose an option:",
@@ -61,8 +67,6 @@ def main():
             )
             st.subheader("Added Points:")
             st.dataframe(points_df, height=200, width=800)
-            
-
 
     elif option == "Generate Random Points":
         st.header("Generate Random Points")
@@ -74,9 +78,13 @@ def main():
             min_range = st.number_input("Enter minimum value:", value=0)
             max_range = st.number_input("Enter maximum value:", value=10)
             if st.button("Generate Points"):
-                st.session_state.x_points = np.random.uniform(min_range, max_range, num_points)
-                st.session_state.y_points = np.random.uniform(min_range, max_range, num_points)
-            
+                st.session_state.x_points = np.random.uniform(
+                    min_range, max_range, num_points
+                )
+                st.session_state.y_points = np.random.uniform(
+                    min_range, max_range, num_points
+                )
+
         with table_col:
             points_df = pd.DataFrame(
                 list(zip(st.session_state.x_points, st.session_state.y_points)),
@@ -86,11 +94,10 @@ def main():
             st.subheader("Added Points:")
             st.dataframe(points_df, height=200, width=800)
 
-            
     elif option == "Add Points from CSV":
         st.header("Add Points from CSV")
         point_col, table_col = st.columns(2)
-        
+
         with point_col:
             st.subheader("Upload CSV file")
             uploaded_file = st.file_uploader("CSV", type=["csv"])
@@ -99,7 +106,7 @@ def main():
                 st.session_state.x_points = df.get("x", [])
                 st.session_state.y_points = df.get("y", [])
 
-        with table_col: 
+        with table_col:
             points_df = pd.DataFrame(
                 list(zip(st.session_state.x_points, st.session_state.y_points)),
                 columns=["X", "Y"],
@@ -107,8 +114,8 @@ def main():
 
             st.subheader("Added Points:")
             st.dataframe(points_df, height=200, width=800)
-            
-    st.header("Create Convex Hull")    
+
+    st.header("Create Convex Hull")
     draw_convex_hull()
 
 
@@ -124,19 +131,61 @@ def draw_convex_hull():
         hull_points = jm()
         fig = jm.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
-        
+
     elif algo == "Graham Scan":
         gs = GrahamScan(points=points)
         hull_points = gs()
         fig = gs.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
-        pass
     elif algo == "QuickHull":
-        pass
+        qh = QuickHull(points=points)
+        hull_points = qh()
+        fig = qh.plot_step_by_step()
+        st.plotly_chart(fig, use_container_width=True)
     elif algo == "Brute Force":
+        bf = BruteForce(points=points)
+        hull_points = bf()
+        fig = bf.plot_step_by_step()
+        st.plotly_chart(fig, use_container_width=True)
         pass
     else:
         pass
+
+
+def line_intersection_page():
+    st.title("Line Intersection Algorithms Visualization")
+    st.write("This is the Line Intersection page.")
+
+
+def credits_page():
+    st.empty()
+    header_text = "Credits"
+    st.markdown(
+        f"""
+        <h1 style='text-align: center;'>{header_text}</h1>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    with open("./templates/index.html", "r") as f:
+        html_string = f.read()
+    st.markdown(html_string, unsafe_allow_html=True)
+    st.subheader("All rights reserved by Ashad (and only Ashad).")
+
+
+def main():
+    st.sidebar.title("Geometry Overpowerred")
+    choice = st.sidebar.radio(
+        "Menu:",
+        ("Credits", "Convex Hull Algorithms", "Line Intersection Algorithms"),
+    )
+
+    if choice == "Credits":
+        credits_page()
+    elif choice == "Convex Hull Algorithms":
+        convex_hull_page()
+    elif choice == "Line Intersection Algorithms":
+        line_intersection_page()
 
 
 if __name__ == "__main__":

@@ -60,8 +60,9 @@ def main():
                 list(zip(st.session_state.x_points, st.session_state.y_points)),
                 columns=["X", "Y"],
             )
-            st.table(points_df)
-
+            st.subheader("Added Points:")
+            st.dataframe(points_df, height=200, width=800)
+            
         if st.button(f"Draw {algo}"):
             if st.button("Draw Convex Hull"):
                 points = np.column_stack(
@@ -70,20 +71,35 @@ def main():
                 draw_convex_hull(points)
 
     elif option == "Generate Random Points":
+        point_col, table_col = st.columns(2)
         st.header("Generate Random Points")
-        num_points = st.number_input(
-            "Enter the number of points:", min_value=1, value=5, step=1
-        )
-        min_range = st.number_input("Enter minimum value:", value=0)
-        max_range = st.number_input("Enter maximum value:", value=10)
-
-        random_points_x = np.random.uniform(min_range, max_range, num_points)
-        random_points_y = np.random.uniform(min_range, max_range, num_points)
+        with point_col:
+            num_points = st.number_input(
+                "Enter the number of points:", min_value=1, value=5, step=1
+            )
+            min_range = st.number_input("Enter minimum value:", value=0)
+            max_range = st.number_input("Enter maximum value:", value=10)
+            random_points_x = []
+            random_points_y = []
+            if st.button("Generate Points"):
+                random_points_x = np.random.uniform(min_range, max_range, num_points)
+                random_points_y = np.random.uniform(min_range, max_range, num_points)
+            
         if st.button("Draw Convex Hull"):
             points = np.column_stack((random_points_x, random_points_y))
             draw_convex_hull(points)
+        with table_col:
+            points_df = pd.DataFrame(
+                list(zip(random_points_x, random_points_y)),
+                columns=["X", "Y"],
+            )
 
+            st.subheader("Added Points:")
+            st.dataframe(points_df, height=200, width=800)
+
+            
     elif option == "Add Points from CSV":
+        
         st.header("Add Points from CSV")
         uploaded_file = st.file_uploader("Upload a CSV file:", type=["csv"])
 
@@ -108,6 +124,7 @@ def draw_convex_hull(points):
         hull_points = jm()
         fig = jm.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
+        
     elif algo == "Graham Scan":
         pass
     elif algo == "QuickHull":

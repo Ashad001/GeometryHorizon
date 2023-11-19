@@ -73,7 +73,7 @@ class JarvisMarch(ConvexHull):
         fig.update_layout(updatemenus=[dict(type='buttons', showactive=False,
                                             buttons=[dict(label='Play',
                                                         method='animate',
-                                                        args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])],
+                                                        args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=False)])])],
                         sliders=[dict(steps=[dict(args=['frame', dict(value=0)]),
                                             dict(args=['frame', dict(value=len(self.hull) - 1)])],
                                     active=0, pad=dict(t=0, l=0.1))])

@@ -8,6 +8,8 @@ from grhamScan import GrahamScan
 from quickHull import QuickHull
 from bruteForce import BruteForce
 
+from lineIntersection import LineIntersection
+
 
 def plot_graph(x, y):
     fig, ax = plt.subplots()
@@ -72,6 +74,7 @@ def convex_hull_page():
         st.header("Generate Random Points")
         point_col, table_col = st.columns(2)
         with point_col:
+            st.subheader("Min/Max Point")
             num_points = st.number_input(
                 "Enter the number of points:", min_value=1, value=5, step=1
             )
@@ -97,7 +100,6 @@ def convex_hull_page():
     elif option == "Add Points from CSV":
         st.header("Add Points from CSV")
         point_col, table_col = st.columns(2)
-
         with point_col:
             st.subheader("Upload CSV file")
             uploaded_file = st.file_uploader("CSV", type=["csv"])
@@ -153,8 +155,132 @@ def draw_convex_hull():
 
 
 def line_intersection_page():
-    st.title("Line Intersection Algorithms Visualization")
-    st.write("This is the Line Intersection page.")
+    st.empty()
+    st.title("Line Intersection Visualizer")
+    option = st.selectbox(
+        "Choose an option:",
+        ("Enter Points Individually", "Generate Random Points", "Add Points from CSV"),
+    )
+
+    if "line_1" not in st.session_state:
+        st.session_state.line_1 = []
+    if "line_2" not in st.session_state:
+        st.session_state.line_2 = []
+
+    if option == "Enter Points Individually":
+        st.header("Enter Points Individually")
+        input_col, table_col = st.columns(2)
+
+        with input_col:
+            st.subheader("Enter Coordinates")
+            x_input = st.text_input("Enter X coordinate:")
+            y_input = st.text_input("Enter Y coordinate:")
+
+            point_col, clear_col = st.columns(2)
+            with point_col:
+                if st.button("Add Point"):
+                    try:
+                        x = float(x_input) if x_input else 0.0
+                        y = float(y_input) if y_input else 0.0
+                        st.session_state.line_1.append(x)
+                        st.session_state.line_2.append(y)
+                        st.success(f"Point ({x}, {y}) added.")
+                    except ValueError:
+                        st.error(
+                            "Invalid input. Please enter valid numerical values for X and Y coordinates."
+                        )
+
+            with clear_col:
+                if st.button("Clear Points"):
+                    st.session_state.line_1 = []
+                    st.session_state.line_2 = []
+                    st.success("Points cleared.")
+
+        with table_col:
+            points_df = pd.DataFrame(
+                list(zip(st.session_state.line_1, st.session_state.line_2)),
+                columns=["X", "Y"],
+            )
+            st.subheader("Added Points:")
+            st.table(points_df)
+
+    elif option == "Generate Random Points":
+        st.header("Generate Random Points")
+        point_col, table_col = st.columns(2)
+        with point_col:
+            st.subheader("Min/Max Point")
+            min_range = st.number_input("Enter minimum value:", value=0)
+            max_range = st.number_input("Enter maximum value:", value=10)
+            if st.button("Generate Points"):
+                st.session_state.line_1 = np.random.uniform(min_range, max_range, 4)
+                st.session_state.line_2 = np.random.uniform(min_range, max_range, 4)
+
+        with table_col:
+            points_df = pd.DataFrame(
+                list(zip(st.session_state.line_1, st.session_state.line_2)),
+                columns=["X", "Y"],
+            )
+
+            st.subheader("Added Points:")
+            st.table(points_df)
+
+    elif option == "Add Points from CSV":
+        point_col, table_col = st.columns(2)
+        with point_col:
+            st.subheader("Upload CSV file")
+            uploaded_file = st.file_uploader("CSV", type=["csv"])
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+                if len(df.columns) != 2 or len(df.index) < 4:
+                    st.error("Invalid CSV file. Please upload a valid CSV file.")
+                if len(df.index) > 4:
+                    df = df.head(4)
+                    st.info("Size too large, only first 4 rows are considered.")
+                st.session_state.line_1 = df.get("x", [])
+                st.session_state.line_2 = df.get("y", [])
+
+        with table_col:
+            points_df = pd.DataFrame(
+                list(zip(st.session_state.line_1, st.session_state.line_1)),
+                columns=["X", "Y"],
+            )
+
+            st.subheader("Added Points:")
+            st.table(points_df)
+
+    st.header("Intersection Points")
+    if st.button("Check Intersection"):
+        if len(st.session_state.line_1) != 4 or len(st.session_state.line_2) != 4:
+            st.error("Add atleast 4 points")
+        else:
+            draw_intersection_points()
+
+
+def draw_intersection_points():
+    algo = st.selectbox(
+        "Choose an algorithm:",
+        ("Brute Force", "Sweep Line"),
+    )
+    lines = [
+        item
+        for pair in zip(st.session_state.line_1, st.session_state.line_2)
+        for item in pair
+    ]
+    line1 = lines[: len(lines) // 2]
+    line2 = lines[len(lines) // 2 :]
+    if algo == "Brute Force":
+        bf = LineIntersection(line1=line1, line2=line2)
+        intersect_points = bf()
+        fig = bf.plot_step_by_step()
+        st.plotly_chart(fig, use_container_width=True)
+
+    elif algo == "Sweep Line":
+        bf = LineIntersection(line1=line1, line2=line2)
+        intersect_points = bf()
+        fig = bf.plot_step_by_step()
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        pass
 
 
 def credits_page():
@@ -167,9 +293,9 @@ def credits_page():
         unsafe_allow_html=True,
     )
 
-    with open("./templates/index.html", "r") as f:
-        html_string = f.read()
-    st.markdown(html_string, unsafe_allow_html=True)
+    # with open("./templates/index.html", "r") as f:
+    #     html_string = f.read()
+    # st.markdown(html_string, unsafe_allow_html=True)
     st.subheader("All rights reserved by Ashad (and only Ashad).")
 
 

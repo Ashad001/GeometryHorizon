@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
+import math
 from base import ConvexHull  # Make sure to import ConvexHull from the correct module
 
 class GrahamScan(ConvexHull):
@@ -10,20 +11,21 @@ class GrahamScan(ConvexHull):
         self.hull = None
         self.hull_points = None
 
+
     def grahamScan(self):
         n = self.n
         points = self.points
         if n < 3:
-            raise ValueError("n must be greater than 3")
+            raise ValueError("n must be greater than 2")
 
-        # Function to find the polar angle with respect to the reference point
+        start_point = min(points, key=lambda p: (p[1], p[0]))
+
         def polar_angle(p):
-            return (p[1] - points[0][1]) / ((p[0] - points[0][0]) + 1e-9)
+            x, y = p[0] - start_point[0], p[1] - start_point[1]
+            return math.atan2(y, x)
 
-        # Sort the points based on polar angle
         sorted_points = sorted(points, key=polar_angle)
-        
-        # Function to calculate the orientation of three points
+
         def orientation(p, q, r):
             val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
             if val == 0:
@@ -39,6 +41,7 @@ class GrahamScan(ConvexHull):
         self.hull = hull
         self.hull_points = sorted_points
         return hull
+
 
     def plot(self, hull_points=None):
         if hull_points is None:

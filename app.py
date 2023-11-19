@@ -115,7 +115,7 @@ def main():
 def draw_convex_hull():
     points = np.column_stack((st.session_state.x_points, st.session_state.y_points))
     algo = st.selectbox(
-        "Choose Convex Hull Algorithm:",
+        "Choose an algorithm:",
         ("Jarvis March", "Graham Scan", "QuickHull", "Brute Force"),
     )
 

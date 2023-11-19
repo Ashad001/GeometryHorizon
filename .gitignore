@@ -38,3 +38,4 @@ dist/
 
 # Ignore any package dependencies
 # Add any additional patterns for package managers like pip, poetry, etc.
+.try.py

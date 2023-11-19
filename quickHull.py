@@ -2,46 +2,63 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
-import math
-from base import ConvexHull  # Make sure to import ConvexHull from the correct module
+from base import ConvexHull  
 
-class GrahamScan(ConvexHull):
+class QuickHull(ConvexHull):
     def __init__(self, points=None, max_x=100, max_y=100):
-        super().__init__(points, max_x, max_y, len(points) if points is not None else None)
-        self.hull = None
-        self.hull_points = None
-
-
-    def grahamScan(self):
+        super().__init__(points, max_x, max_y, len(points)if points is not None else None)
+        self.hull = []
+        self.hull_points = []
+        
+    def quickHull(self):
         n = self.n
         points = self.points
+
+        def distance(p, q, r):
+            return ((q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]))
+
+        def find_side(p1, p2, points):
+            # Find points on the left side of the line formed by p1 and p2
+            return [point for point in points if distance(p1, p2, point) > 0]
+
+        def quick_hull_util(p1, p2, points, hull):
+            if not points:
+                return
+
+            max_dist = -1
+            farthest_point = None
+
+            for point in points:
+                dist = distance(p1, p2, point)
+                if dist > max_dist:
+                    max_dist = dist
+                    farthest_point = point
+
+            hull.append(farthest_point)
+
+            points_left = find_side(p1, farthest_point, points)
+            points_right = find_side(farthest_point, p2, points)
+
+            quick_hull_util(p1, farthest_point, points_left, hull)
+            quick_hull_util(farthest_point, p2, points_right, hull)
+
         if n < 3:
             raise ValueError("n must be greater than 2")
 
-        start_point = min(points, key=lambda p: (p[1], p[0]))
+        min_point = min(points, key=lambda x: x[0])
+        max_point = max(points, key=lambda x: x[0])
 
-        def polar_angle(p):
-            x, y = p[0] - start_point[0], p[1] - start_point[1]
-            return math.atan2(y, x)
+        hull = [min_point, max_point]
 
-        sorted_points = sorted(points, key=polar_angle)
+        points_left = find_side(min_point, max_point, points)
+        points_right = find_side(max_point, min_point, points)
 
-        def orientation(p, q, r):
-            val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
-            if val == 0:
-                return 0
-            return 1 if val > 0 else -1
-
-        hull = [sorted_points[0], sorted_points[1]]
-        for i in range(2, n):
-            while len(hull) > 1 and orientation(hull[-2], hull[-1], sorted_points[i]) != -1:
-                hull.pop()
-            hull.append(sorted_points[i])
+        quick_hull_util(min_point, max_point, points_left, hull)
+        quick_hull_util(max_point, min_point, points_right, hull)
 
         self.hull = hull
-        self.hull_points = sorted_points
+        self.hull_points = hull
         return hull
-
 
     def plot(self, hull_points=None):
         if hull_points is None:
@@ -117,11 +134,11 @@ class GrahamScan(ConvexHull):
         return fig
 
     def __call__(self):
-        self.grahamScan()
+        self.quickHull()
         self.plot_step_by_step()
         return self.hull
 
 
 if __name__ == "__main__":
-    gs = GrahamScan()
-    print(gs())
+    qh = QuickHull()
+    print(qh())

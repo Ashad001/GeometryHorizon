@@ -1,67 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Document Title</title>
-    <style>
-      body {
-        font-family: "Times New Roman", Times, serif;
-        column-count: 2;
-        font-size: 10px;
-        text-align: left;
-      }
-
-      p {
-        margin: 0; /* Remove default margin to avoid extra space */
-      }
-
-      h1 {
-        margin: 0; /* Remove default margin to avoid extra space */
-        page-break-before: always; /* Start each h1 on a new page */
-      }
-
-      /* Make the document scrollable */
-      html,
-      body {
-        height: 50%;
-        margin: 0;
-        overflow-y: scroll;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Your existing HTML content goes here -->
-    <p>Algorithms Visualization</p>
-    <p>Ashad Abdullah K21-3296</p>
-    <h1>Abstract</h1>
-    <p>Your abstract goes here.</p>
-    <h1>Introduction</h1>
-    <p>Introduction to your project.</p>
-    <h1>Your Programming Design</h1>
-    <p>
-      Describe the programming language used, provide a clear diagram of your
-      system, and discuss the design.
-    </p>
-    <h1>Experimental Setup</h1>
-    <p>
-      Explain the experimental setup, including hardware and software
-      configurations.
-    </p>
-    <h1>Results and Discussion</h1>
-    <p>
-      Present screenshots and discuss the results. Include exe- cution time and
-      compare various algorithms if applicable.
-    </p>
-    <h1>Conclusion</h1>
-    <p>Summarize your findings and conclude the report.</p>
-    <h1>References</h1>
-    <p>List your references here.</p>
-    <p><strong>Appendix</strong></p>
-    <h1>Appendix - Experimental Screenshots</h1>
-    <p>
-      Include screenshots, additional graphs, or any supplemen- tary material
-      here.
-    </p>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convex Hull</title>
+</head>
+<body>
+    <h1>Convex Hull</h1>
+    <form action="/convex_hull" method="post">
+        <label for="num_points">Number of Points:</label>
+        <input type="number" name="num_points" required>
+        <br>
+        <label for="x_range">X Range (start end):</label>
+        <input type="text" name="x_range" required>
+        <br>
+        <label for="y_range">Y Range (start end):</label>
+        <input type="text" name="y_range" required>
+        <br>
+        <input type="submit" value="Generate Convex Hull">
+    </form>
+</body>
 </html>

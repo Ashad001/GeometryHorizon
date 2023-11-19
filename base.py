@@ -10,8 +10,7 @@ class ConvexHull:
     def __init__(self, points=None, max_x=100, max_y=100, n=10):
         self.points = points
         self.n = n
-        if points is None or n < 3:
-            n = 10
+        if n is not None:
             self.generatePoints(n, x_range=(0, max_x), y_range=(0, max_y))   
 
         

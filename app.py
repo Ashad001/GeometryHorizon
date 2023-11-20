@@ -293,9 +293,9 @@ def credits_page():
         unsafe_allow_html=True,
     )
 
-    # with open("./templates/index.html", "r") as f:
-    #     html_string = f.read()
-    # st.markdown(html_string, unsafe_allow_html=True)
+    with open("./templates/index.html", "r") as f:
+        html_string = f.read()
+    st.markdown(html_string, unsafe_allow_html=True)
     st.subheader("All rights reserved by Ashad (and only Ashad).")
 
 

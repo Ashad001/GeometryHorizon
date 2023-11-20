@@ -283,12 +283,18 @@ def draw_intersection_points():
         pass
 
 
-def credits_page():
+def report_page():
     st.empty()
-    header_text = "Credits"
+    header_text = "Design and Analysis of Geometric Algorithms"
     st.markdown(
         f"""
         <h1 style='text-align: center;'>{header_text}</h1>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"""
+        <h5 style='text-align: center;'>Ashad Abdullah Qureshi November 20, 2023</h5>
         """,
         unsafe_allow_html=True,
     )
@@ -303,11 +309,11 @@ def main():
     st.sidebar.title("Geometry Overpowerred")
     choice = st.sidebar.radio(
         "Menu:",
-        ("Credits", "Convex Hull Algorithms", "Line Intersection Algorithms"),
+        ("report", "Convex Hull Algorithms", "Line Intersection Algorithms"),
     )
 
-    if choice == "Credits":
-        credits_page()
+    if choice == "report":
+        report_page()
     elif choice == "Convex Hull Algorithms":
         convex_hull_page()
     elif choice == "Line Intersection Algorithms":

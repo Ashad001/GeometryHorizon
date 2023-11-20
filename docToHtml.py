@@ -82,49 +82,67 @@ def add_html_codes(input_data):
 
 html = mammoth.convert_to_html("Algorithm_Project_Report.docx", convert_image=mammoth.images.img_element(convert_image))
 html = add_html_codes(html.value)
-print(html)
-with open("output2.html", "w") as f:
+with open("./templates/index.html", "w") as f:
     f.write("""
-            <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Streamlit App</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 20px;
-    }
+    
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Streamlit App</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        margin: 20px;
+      }
+  
+      h5 {
+        color: #d8f3dc;
+      }
 
-    h1 {
-      color: #0066cc;
-    }
+      h4 {
+        color: #b7e4c7;
+      }
 
-    p {
-      line-height: 1.5;
-    }
+      h3 {
+        color: #95d5b2;
+      }
 
-    strong {
-      color: #0066cc;
-    }
+      h2 {
+        color: #52b788;
+      }
+      
+      h1 {
+        color: #40916c;
+      }
+      
+      p {
+        line-height: 1.5;
+      }
+  
+      strong {
+        color: #52b788;
+      }
+  
+      h1 + p {
+        margin-top: 10px;
+      }
+  
+      h1:last-of-type + p {
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+      }
+  
+      p:nth-child(2) {
+        color: #888;
+      }
 
-    /* Optional: Add some spacing between sections */
-    h1 + p {
-      margin-top: 10px;
-    }
+      a {
+        color: #1b4332;
+      }
 
-    /* Optional: Add a border to the appendix section */
-    h1:last-of-type + p {
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-    }
 
-    /* Optional: Style the date in a different color */
-    p:nth-child(2) {
-      color: #888;
-    }
-  </style>
-</head>
-<body>""")
+    </style>
+  </head>""")
     f.write(html)
     f.write("</body></html>")

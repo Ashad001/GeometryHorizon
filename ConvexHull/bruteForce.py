@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
-from base import ConvexHull
+from .base import ConvexHull
 
 
 class BruteForce(ConvexHull):

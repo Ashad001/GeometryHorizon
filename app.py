@@ -3,12 +3,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from jarvisMarch import JarvisMarch
-from grhamScan import GrahamScan
-from quickHull import QuickHull
-from bruteForce import BruteForce
+from ConvexHull.jarvisMarch import JarvisMarch
+from ConvexHull.grhamScan import GrahamScan
+from ConvexHull.quickHull import QuickHull
+from ConvexHull.bruteForce import BruteForce
 
-from lineIntersection import LineIntersection
+from LineIntersection.lineIntersection import LineIntersection
 
 
 def plot_graph(x, y):

@@ -1,4 +1,4 @@
-from base import ConvexHull
+from .base import ConvexHull
 import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.graph_objects as go

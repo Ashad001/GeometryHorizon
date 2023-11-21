@@ -24,7 +24,7 @@ class QuickHull(ConvexHull):
         def quick_hull_util(p1, p2, points, hull):
             if not points:
                 return
-
+            
             max_dist = -1
             farthest_point = None
 

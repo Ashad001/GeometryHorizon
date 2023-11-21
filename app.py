@@ -131,7 +131,8 @@ def draw_convex_hull():
     if algo == "Jarvis March":
         jm = JarvisMarch(points=points)
         hull_points = jm()
-        fig = jm.plot_step_by_step()
+        # fig = jm.plot_step_by_step()
+        fig = jm.create_animation()
         st.plotly_chart(fig, use_container_width=True)
 
     elif algo == "Graham Scan":

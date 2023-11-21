@@ -1,16 +1,19 @@
-import matplotlib.pyplot as plt
 import streamlit as st
+import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
+
 import math
-from .base import ConvexHull  # Make sure to import ConvexHull from the correct module
+import numpy as np
+
+from plotly.subplots import make_subplots
+from .base import ConvexHull  
 
 class GrahamScan(ConvexHull):
     def __init__(self, points=None, max_x=100, max_y=100):
         super().__init__(points, max_x, max_y, len(points) if points is not None else None)
         self.hull = None
         self.hull_points = None
-
 
     def grahamScan(self):
         n = self.n
@@ -39,7 +42,6 @@ class GrahamScan(ConvexHull):
             hull.append(sorted_points[i])
 
         self.hull = hull
-        self.hull_points = sorted_points
         return hull
 
 
@@ -51,37 +53,70 @@ class GrahamScan(ConvexHull):
         plt.show()
 
     def plot_step_by_step(self):
-        fig = go.Figure()
+        hull_points_list = self.hull
+        fig = make_subplots(rows=1, cols=1, specs=[[{"type": "scatter"}]])
+
+        scatter_trace = go.Scatter(
+            x=self.points[:, 0],
+            y=self.points[:, 1],
+            mode="markers",
+            name="Points",
+            marker=dict(color="blue"),
+        )
+        fig.add_trace(scatter_trace)
+
         frames = []
 
-        for i in range(len(self.hull)):
-            current_point = self.hull[i]
-            next_point = self.hull[(i + 1) % len(self.hull)]
+        for i in range(len(hull_points_list)):
+            hull_points = np.array(hull_points_list[: i + 1])
 
-            frame_data = [
-                go.Scatter(
-                    x=[p[0] for p in self.points],
-                    y=[p[1] for p in self.points],
-                    mode="markers",
-                    marker=dict(color="blue", size=10),
-                    showlegend=False,
-                ),
-                go.Scatter(
-                    x=[current_point[0], next_point[0]],
-                    y=[current_point[1], next_point[1]],
-                    mode="lines",
-                    line=dict(color="green"),
-                    showlegend=False,
-                ),
-            ]
+            scatter_frame = go.Frame(
+                data=[
+                    go.Scatter(
+                        x=self.points[:, 0],
+                        y=self.points[:, 1],
+                        mode="markers",
+                        name="Points",
+                    ),
+                    go.Scatter(
+                        x=hull_points[:, 0],
+                        y=hull_points[:, 1],
+                        mode="markers",
+                        name="Hull Points",
+                    ),
+                ],
+                name=f"Frame {i}",
+            )
+            frames.append(scatter_frame)
 
-            fig.add_trace(frame_data[0])
-            fig.add_trace(frame_data[1])
-
-            frames.append(go.Frame(data=frame_data, name=f"Frame {i + 1}"))
+            if len(hull_points) > 1:
+                hull_x = np.append(hull_points[:, 0], hull_points[0, 0])
+                hull_y = np.append(hull_points[:, 1], hull_points[0, 1])
+                hull_frame = go.Frame(
+                    data=[
+                        go.Scatter(
+                            x=hull_x,
+                            y=hull_y,
+                            mode="lines+markers+text",
+                            line=dict(color="green"),
+                            name="Convex Hull",
+                        ),
+                    ],
+                    name=f"Frame {i}_hull",
+                )
+                frames.append(hull_frame)
 
         fig.frames = frames
 
+        fig.update_layout(
+            title="Convex Hull Animation",
+            xaxis=dict(title="X-axis"),
+            yaxis=dict(title="Y-axis"),
+        )
+
+        animation_settings = dict(
+            frame=dict(duration=1000, redraw=True), fromcurrent=True
+        )
         fig.update_layout(
             updatemenus=[
                 dict(
@@ -91,28 +126,13 @@ class GrahamScan(ConvexHull):
                         dict(
                             label="Play",
                             method="animate",
-                            args=[
-                                None,
-                                dict(
-                                    frame=dict(duration=500, redraw=True),
-                                    fromcurrent=False,
-                                ),
-                            ],
+                            args=[None, animation_settings],
                         )
                     ],
                 )
-            ],
-            sliders=[
-                dict(
-                    steps=[
-                        dict(args=["frame", dict(value=0)]),
-                        dict(args=["frame", dict(value=len(self.hull) - 1)]),
-                    ],
-                    active=0,
-                    pad=dict(t=0, l=0.1),
-                )
-            ],
+            ]
         )
+
 
         return fig
 

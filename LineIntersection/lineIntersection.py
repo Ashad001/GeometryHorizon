@@ -127,10 +127,3 @@ class LineIntersection:
         self.plot_step_by_step()
         return self.intersect
 
-
-# if __name__ == "__main__":
-#     line1 = [1, 2, 0, 4]
-#     line2 = [4, 2, 1, 4]
-
-#     intersection_checker = LineIntersection(line1, line2)
-#     print(intersection_checker())

@@ -1,55 +1,86 @@
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
-def orientation(p, q, r):
-    ''' Return positive if p-q-r are clockwise, neg if counterclockwise, and 0 if collinear '''
-    return (q[1] - p[1]) * (r[0] - p[0]) - (q[0] - p[0]) * (r[1] - p[1])
+class ConvexHullAnimator:
+    def __init__(self, points):
+        self.points = points
 
-def convex_hull(points):
-    ''' Graham scan for convex hull '''
-    # Sorting the points based on their x-coordinate
-    points = sorted(points, key=lambda point: (point[0], point[1]))
-    hull = []
+    @staticmethod
+    def orientation(p, q, r):
+        val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+        if val == 0:
+            return 0 
+        return 1 if val > 0 else 2
 
-    for point in points:
-        while len(hull) >= 2 and orientation(hull[-2], hull[-1], point) <= 0:
-            yield (hull, 'red')  # Edge is being removed (rejected)
-            hull.pop()
-        hull.append(tuple(point))  # Convert numpy array to tuple
-        yield (hull, 'green')  # Edge is being added (accepted)
+    def convex_hull_animation(self):
+        n = len(self.points)
+        if n < 3:
+            return [self.points]
 
-    # Lower hull
-    for point in reversed(points):
-        while len(hull) >= 2 and orientation(hull[-2], hull[-1], point) <= 0:
-            yield (hull, 'red')  # Edge is being removed (rejected)
-            hull.pop()
-        hull.append(tuple(point))  # Convert numpy array to tuple
-        # yield (hull, 'green')  # Edge is being added (accepted)
+        hull_points_list = []
 
-    yield (hull, 'white')  # Final hull
+        l = min(range(n), key=lambda i: self.points[i][0])
 
-# Generating random points
-np.random.seed(4)
+        p = l
+        q = 0
+        while True:
+            hull_points_list.append(self.points[p])
+
+            q = (p + 1) % n
+            for i in range(n):
+                if self.orientation(self.points[p], self.points[i], self.points[q]) == 2:
+                    q = i
+
+            p = q
+
+            if p == l:
+                break
+
+        return hull_points_list
+
+    def create_animation(self):
+        hull_points_list = self.convex_hull_animation()
+
+        fig = make_subplots(rows=1, cols=1, specs=[[{'type': 'scatter'}]])
+
+        scatter_trace = go.Scatter(x=self.points[:, 0], y=self.points[:, 1], mode='markers', name='Points', marker=dict(color='blue'))
+        fig.add_trace(scatter_trace)
+
+        frames = []
+
+        for i in range(len(hull_points_list)):
+            hull_points = np.array(hull_points_list[:i + 1])
+
+            scatter_frame = go.Frame(
+                data=[go.Scatter(x=self.points[:, 0], y=self.points[:, 1], mode='markers', name='Points'),
+                      go.Scatter(x=hull_points[:, 0], y=hull_points[:, 1], mode='markers', name='Hull Points')],
+                name=f'Frame {i}'
+            )
+            frames.append(scatter_frame)
+
+            if len(hull_points) > 1:
+                hull_x = np.append(hull_points[:, 0], hull_points[0, 0])
+                hull_y = np.append(hull_points[:, 1], hull_points[0, 1])
+                hull_frame = go.Frame(
+                    data=[go.Scatter(x=hull_x, y=hull_y, mode='lines', line=dict(color='red'), name='Convex Hull')],
+                    name=f'Frame {i}_hull'
+                )
+                frames.append(hull_frame)
+
+        fig.frames = frames
+
+        fig.update_layout(title='Convex Hull Animation', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
+
+        animation_settings = dict(frame=dict(duration=1500, redraw=True), fromcurrent=True)
+        fig.update_layout(updatemenus=[dict(type='buttons', showactive=False, buttons=[dict(label='Play', method='animate', args=[None, animation_settings])])])
+
+        return fig
+
+# Example usage:
+np.random.seed(42)
 points = np.random.rand(20, 2)
 
-# Visualization setup
-fig, ax = plt.subplots()
-fig.patch.set_facecolor('black')  # Set the background color of the figure
-ax.set_facecolor('black')  # Set the background color of the axes
-x, y = zip(*points)
-sc = ax.scatter(x, y, color='white')  # Set point color to white for contrast
-line, = ax.plot([], [], lw=2, color='white')  # Initial line color
-
-# Update function for animation
-def update(frame):
-    hull, color = frame
-    line.set_color(color)
-    x, y = zip(*hull)
-    line.set_data(x, y)
-    return line,
-
-# Creating animation
-anim = FuncAnimation(fig, update, frames=convex_hull(points), blit=True, repeat=False)
-
-plt.show()
+animator = ConvexHullAnimator(points)
+animation_fig = animator.create_animation()
+animation_fig.show()

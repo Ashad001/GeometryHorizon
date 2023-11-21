@@ -22,7 +22,13 @@ algo = "Jarvis March"
 
 def convex_hull_page():
     st.empty()
-    st.title("Convex Hull Visualizer")
+    header_text = "Convex Hull Visualizer"
+    st.markdown(
+    f"""
+    <h1 style='text-align: center; color: #40916c;'>{header_text}</h1>
+    """,
+    unsafe_allow_html=True,
+    )
     option = st.selectbox(
         "Choose an option:",
         ("Enter Points Individually", "Generate Random Points", "Add Points from CSV"),
@@ -34,11 +40,23 @@ def convex_hull_page():
         st.session_state.y_points = []
 
     if option == "Enter Points Individually":
-        st.header("Enter Points Individually")
+        header_text = "Enter Points Individually"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
         input_col, table_col = st.columns(2)
 
         with input_col:
-            st.subheader("Enter Coordinates")
+            header_text = "Enter Coordinates"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             x_input = st.text_input("Enter X coordinate:")
             y_input = st.text_input("Enter Y coordinate:")
 
@@ -67,11 +85,23 @@ def convex_hull_page():
                 list(zip(st.session_state.x_points, st.session_state.y_points)),
                 columns=["X", "Y"],
             )
-            st.subheader("Added Points:")
+            header_text = "Points Added"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             st.dataframe(points_df, height=200, width=800)
 
     elif option == "Generate Random Points":
-        st.header("Generate Random Points")
+        header_text = "Generate Random Points"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
         point_col, table_col = st.columns(2)
         with point_col:
             st.subheader("Min/Max Point")
@@ -83,10 +113,10 @@ def convex_hull_page():
             if st.button("Generate Points"):
                 st.session_state.x_points = np.random.uniform(
                     min_range, max_range, num_points
-                )
+                ).tolist()
                 st.session_state.y_points = np.random.uniform(
                     min_range, max_range, num_points
-                )
+                ).tolist()
 
         with table_col:
             points_df = pd.DataFrame(
@@ -94,11 +124,23 @@ def convex_hull_page():
                 columns=["X", "Y"],
             )
 
-            st.subheader("Added Points:")
+            header_text = "Added Points"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             st.dataframe(points_df, height=200, width=800)
 
     elif option == "Add Points from CSV":
-        st.header("Add Points from CSV")
+        header_text = "Add Points from CSV"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
         point_col, table_col = st.columns(2)
         with point_col:
             st.subheader("Upload CSV file")
@@ -114,10 +156,22 @@ def convex_hull_page():
                 columns=["X", "Y"],
             )
 
-            st.subheader("Added Points:")
+            header_text = "Added Points"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             st.dataframe(points_df, height=200, width=800)
 
-    st.header("Create Convex Hull")
+    header_text = "Convex Hull"
+    st.markdown(
+    f"""
+    <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+    """,
+    unsafe_allow_html=True,
+    )
     draw_convex_hull()
 
 
@@ -131,9 +185,10 @@ def draw_convex_hull():
     if algo == "Jarvis March":
         jm = JarvisMarch(points=points)
         hull_points = jm()
-        fig = jm.plot_step_by_step()
+        # fig = jm.plot_step_by_step()
+        fig = jm.create_animation()
         st.plotly_chart(fig, use_container_width=True)
-
+       
     elif algo == "Graham Scan":
         gs = GrahamScan(points=points)
         hull_points = gs()
@@ -152,11 +207,28 @@ def draw_convex_hull():
         pass
     else:
         pass
+    
+    if hull_points is not None:
+        header_text = "Convex Hull Points"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
+        st.dataframe(hull_points, height=200, width=800, hide_index=True)
+
 
 
 def line_intersection_page():
     st.empty()
-    st.title("Line Intersection Visualizer")
+    header_text = "Line Intersection Visualizer"
+    st.markdown(
+        f"""
+        <h1 style='text-align: center; color: #40916c'>{header_text}</h1>
+        """,
+        unsafe_allow_html=True,
+        )
     option = st.selectbox(
         "Choose an option:",
         ("Enter Points Individually", "Generate Random Points", "Add Points from CSV"),
@@ -168,11 +240,23 @@ def line_intersection_page():
         st.session_state.line_2 = []
 
     if option == "Enter Points Individually":
-        st.header("Enter Points Individually")
+        header_text = "Enter Points Individually"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
         input_col, table_col = st.columns(2)
-
+       
         with input_col:
-            st.subheader("Enter Coordinates")
+            header_text = "Enter Coordinates"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             x_input = st.text_input("Enter X coordinate:")
             y_input = st.text_input("Enter Y coordinate:")
 
@@ -182,6 +266,8 @@ def line_intersection_page():
                     try:
                         x = float(x_input) if x_input else 0.0
                         y = float(y_input) if y_input else 0.0
+                        if len(st.session_state.line_1) > 4 or len(st.session_state.line_2) > 4:
+                            st.error("Only 4 points can be added, Please clear the points first.")
                         st.session_state.line_1.append(x)
                         st.session_state.line_2.append(y)
                         st.success(f"Point ({x}, {y}) added.")
@@ -201,19 +287,33 @@ def line_intersection_page():
                 list(zip(st.session_state.line_1, st.session_state.line_2)),
                 columns=["X", "Y"],
             )
-            st.subheader("Added Points:")
+            header_text = "Added Points"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             st.table(points_df)
 
     elif option == "Generate Random Points":
-        st.header("Generate Random Points")
+        header_text = "Generate Random Points"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
         point_col, table_col = st.columns(2)
         with point_col:
             st.subheader("Min/Max Point")
             min_range = st.number_input("Enter minimum value:", value=0)
             max_range = st.number_input("Enter maximum value:", value=10)
             if st.button("Generate Points"):
-                st.session_state.line_1 = np.random.uniform(min_range, max_range, 4)
-                st.session_state.line_2 = np.random.uniform(min_range, max_range, 4)
+                line_1 =  np.random.uniform(min_range, max_range, 4)
+                line_2 =  np.random.uniform(min_range, max_range, 4)
+                st.session_state.line_1 = line_1.tolist()
+                st.session_state.line_2 = line_2.tolist()
 
         with table_col:
             points_df = pd.DataFrame(
@@ -221,10 +321,23 @@ def line_intersection_page():
                 columns=["X", "Y"],
             )
 
-            st.subheader("Added Points:")
+            header_text = "Added Points"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             st.table(points_df)
 
     elif option == "Add Points from CSV":
+        header_text = "Add Points from CSV"
+        st.markdown(
+        f"""
+        <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+        """,
+        unsafe_allow_html=True,
+        )
         point_col, table_col = st.columns(2)
         with point_col:
             st.subheader("Upload CSV file")
@@ -245,21 +358,31 @@ def line_intersection_page():
                 columns=["X", "Y"],
             )
 
-            st.subheader("Added Points:")
+            header_text = "Added Points"
+            st.markdown(
+            f"""
+            <h4 style='text-align: center; color: #d8f3dc;'>{header_text}</h4>
+            """,
+            unsafe_allow_html=True,
+            )
             st.table(points_df)
 
-    st.header("Intersection Points")
-    if st.button("Check Intersection"):
-        if len(st.session_state.line_1) != 4 or len(st.session_state.line_2) != 4:
-            st.error("Add atleast 4 points")
-        else:
-            draw_intersection_points()
-
+    header_text = "Intersection"
+    st.markdown(
+    f"""
+    <h3 style='text-align: center; color: #95d5b2;'>{header_text}</h3>
+    """,
+    unsafe_allow_html=True,
+    )
+    if len(st.session_state.line_1) == 4:
+        draw_intersection_points()
+    else:
+        st.info("Please add 4 points to find intersection points.")
 
 def draw_intersection_points():
     algo = st.selectbox(
         "Choose an algorithm:",
-        ("Brute Force", "Sweep Line"),
+        ("Brute Force", "Sweep Line", "One More (TBD)"),
     )
     lines = [
         item
@@ -288,7 +411,7 @@ def report_page():
     header_text = "Design and Analysis of Geometric Algorithms"
     st.markdown(
         f"""
-        <h1 style='text-align: center;'>{header_text}</h1>
+        <h1 style='text-align: center; color: #40916c'>{header_text}</h1>
         """,
         unsafe_allow_html=True,
     )
@@ -309,10 +432,10 @@ def main():
     st.sidebar.title("Geometry Overpowerred")
     choice = st.sidebar.radio(
         "Menu:",
-        ("report", "Convex Hull Algorithms", "Line Intersection Algorithms"),
+        ("Report", "Convex Hull Algorithms", "Line Intersection Algorithms"),
     )
 
-    if choice == "report":
+    if choice == "Report":
         report_page()
     elif choice == "Convex Hull Algorithms":
         convex_hull_page()

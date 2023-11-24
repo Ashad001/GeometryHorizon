@@ -420,16 +420,18 @@ def report_page():
         """,
         unsafe_allow_html=True,
     )
+
+    with open("./templates/credits.html", "r") as file:
+        html_content = file.read()
+
+    st.markdown(html_content, unsafe_allow_html=True)
+
+    with open("./templates/report.html", "r") as f:
+        html_string = f.read()
     st.markdown(
-        f"""
-        <h5 style='text-align: center;'>Ashad Abdullah Qureshi November 20, 2023</h5>
-        """,
+        html_string,
         unsafe_allow_html=True,
     )
-
-    with open("./templates/index.html", "r") as f:
-        html_string = f.read()
-    st.markdown(html_string, unsafe_allow_html=True)
     st.subheader("All rights reserved by Ashad (and only Ashad).")
 
 

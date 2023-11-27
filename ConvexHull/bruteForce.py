@@ -2,7 +2,6 @@ import numpy as np
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-
 class Point:
     def __init__(self, x=0, y=0):
         self.X = x
@@ -28,21 +27,15 @@ class Point:
         det = x1 * y2 - x2 * y1
         return det == 0 and x1 * x2 <= 0 and y1 * y2 <= 0
 
-np.random.seed(42)
-points = np.random.rand(20, 2)
-
-points = [Point(x, y) for x, y in points]
-
-convex_hull = []
-next_point = {}
-side = {}
-
-class BruteForce(points=none, max_x=100, max_y=100):
+class BruteForce:
     def __init__(self, points=None, max_x=100, max_y=100):
-        super().__init__(points, max_x, max_y, len(points) if points is not None else None)
-        self.hull = None
-        self.hull_points = None
-     
+        self.points = [Point(x, y) for x, y in points]
+        self.max_x = max_x
+        self.max_y = max_y
+        self.convex_hull = []
+        self.next_point = {}
+        self.side = {}
+
     def bruteForce(self):
         n = len(self.points)
         if n < 3:
@@ -66,25 +59,25 @@ class BruteForce(points=none, max_x=100, max_y=100):
                                     point_on_segment = True
 
                     if right_turn_count + collinear_count == n - 2:
-                        if not (point_on_segment and side.get((j, i), False)):
+                        if not (point_on_segment and self.side.get((j, i), False)):
                             hull_points_list.append((self.points[i], self.points[j]))
-                            next_point[self.points[i]] = self.points[j]
-                            side[(i, j)] = True
-        self.hull_points = hull_points_list
+                            self.next_point[self.points[i]] = self.points[j]
+                            self.side[(i, j)] = True
+        self.convex_hull = hull_points_list
         return hull_points_list 
 
-    def create_animation(convex_hull, next_point):
+    def create_animation(self):
         fig = make_subplots(rows=1, cols=1)
 
         frames = []
-        for k in range(len(convex_hull) + 1):
+        for k in range(len(self.convex_hull) + 1):
             frame_points = []
-            P = P0 = convex_hull[0][0]
+            P = P0 = self.convex_hull[0][0]
             current = 0
 
             while current < k:
                 frame_points.append((P.X, P.Y))
-                P = next_point[P]
+                P = self.next_point[P]
                 current += 1
 
             if P != P0:
@@ -115,7 +108,7 @@ class BruteForce(points=none, max_x=100, max_y=100):
                     'args': [[None], {'frame': {'duration': 0, 'redraw': True}, 'mode': 'immediate', 'transition': {'duration': 0}}],
                     'label': 'Pause',
                     'method': 'animate',
-                },
+                }
             ],
             'direction': 'left',
             'pad': {'r': 10, 't': 87},
@@ -124,14 +117,18 @@ class BruteForce(points=none, max_x=100, max_y=100):
             'x': 0.1,
             'xanchor': 'right',
             'y': 0,
-            'yanchor': 'top',
+            'yanchor': 'top'
         }])
 
-        fig.update_layout(title='Brute Force Animation', showlegend=False)
-
-        return fig
-
+        fig.show()
+        
     def __call__(self):
         self.bruteForce()
-        animation_fig = self.create_animation()
-        return self.hull_points
+        animation_fig=self.create_animation()
+        return self.convex_hull
+
+np.random.seed(42)
+points = np.random.rand(20, 2)
+
+brute_force_solver = BruteForce(points=points)
+brute_force_solver()

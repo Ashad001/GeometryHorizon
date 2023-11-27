@@ -37,98 +37,101 @@ convex_hull = []
 next_point = {}
 side = {}
 
-for i in range(len(points)):
-    for j in range(len(points)):
-        if i != j:
-            point_on_segment = False
-            right_turn_count = 0
-            collinear_count = 0
-            for k in range(len(points)):
-                if k != i and k != j:
-                    if points[i].is_turning_right(points[j], points[k]):
-                        right_turn_count += 1
-                    if points[i].is_collinear(points[j], points[k]):
-                        collinear_count += 1
-                        if points[k].is_on_segment(points[i], points[j]):
-                            point_on_segment = True
+class BruteForce(points=none, max_x=100, max_y=100):
+    def __init__(self, points=None, max_x=100, max_y=100):
+        super().__init__(points, max_x, max_y, len(points) if points is not None else None)
+        self.hull = None
+        self.hull_points = None
+     
+    def bruteForce(self):
+        n = len(self.points)
+        if n < 3:
+            return [self.points]
 
-            if right_turn_count + collinear_count == len(points) - 2:
-                if not (point_on_segment and side.get((j, i), False)):
-                    convex_hull.append((points[i], points[j]))
-                    next_point[points[i]] = points[j]
-                    side[(i, j)] = True
+        hull_points_list = []
 
-def output_points():
-    print(f"There are {len(convex_hull)} points forming the convex hull.")
-    print("The points forming the convex hull in clockwise order are:")
-    P0 = P = convex_hull[0][0]
-    current = 0
-    while current < len(convex_hull):
-        print(P.X, P.Y)
-        P = next_point[P]
-        current += 1
-    if P != P0:
-        print(P.X, P.Y)
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    point_on_segment = False
+                    right_turn_count = 0
+                    collinear_count = 0
+                    for k in range(n):
+                        if k != i and k != j:
+                            if self.points[i].is_turning_right(self.points[j], self.points[k]):
+                                right_turn_count += 1
+                            if self.points[i].is_collinear(self.points[j], self.points[k]):
+                                collinear_count += 1
+                                if self.points[k].is_on_segment(self.points[i], self.points[j]):
+                                    point_on_segment = True
 
-def create_animation(convex_hull, next_point):
-    fig = make_subplots(rows=1, cols=1)
+                    if right_turn_count + collinear_count == n - 2:
+                        if not (point_on_segment and side.get((j, i), False)):
+                            hull_points_list.append((self.points[i], self.points[j]))
+                            next_point[self.points[i]] = self.points[j]
+                            side[(i, j)] = True
+        self.hull_points = hull_points_list
+        return hull_points_list 
 
-    frames = []
-    for k in range(len(convex_hull) + 1):
-        frame_points = []
-        P = P0 = convex_hull[0][0]
-        current = 0
+    def create_animation(convex_hull, next_point):
+        fig = make_subplots(rows=1, cols=1)
 
-        while current < k:
-            frame_points.append((P.X, P.Y))
-            P = next_point[P]
-            current += 1
+        frames = []
+        for k in range(len(convex_hull) + 1):
+            frame_points = []
+            P = P0 = convex_hull[0][0]
+            current = 0
 
-        if P != P0:
-            frame_points.append((P.X, P.Y))
+            while current < k:
+                frame_points.append((P.X, P.Y))
+                P = next_point[P]
+                current += 1
 
-        frame_hull = [(P0.X, P0.Y)] + frame_points + [(P0.X, P0.Y)]
+            if P != P0:
+                frame_points.append((P.X, P.Y))
 
-        trace = go.Scatter(
-            x=[point[0] for point in frame_hull],
-            y=[point[1] for point in frame_hull],
-            mode='lines+markers',
-            name=f'Frame {k}',
-        )
+            frame_hull = [(P0.X, P0.Y)] + frame_points + [(P0.X, P0.Y)]
 
-        frames.append(go.Frame(data=[trace], name=f'Frame {k}'))
+            trace = go.Scatter(
+                x=[point[0] for point in frame_hull],
+                y=[point[1] for point in frame_hull],
+                mode='lines+markers',
+                name=f'Frame {k}',
+            )
 
-    fig.add_trace(frames[0]['data'][0])
-    fig.frames = frames
+            frames.append(go.Frame(data=[trace], name=f'Frame {k}'))
 
-    fig.update_layout(updatemenus=[{
-        'buttons': [
-            {
-                'args': [None, {'frame': {'duration': 1500, 'redraw': True}, 'fromcurrent': True}],
-                'label': 'Play',
-                'method': 'animate',
-            },
-            {
-                'args': [[None], {'frame': {'duration': 0, 'redraw': True}, 'mode': 'immediate', 'transition': {'duration': 0}}],
-                'label': 'Pause',
-                'method': 'animate',
-            },
-        ],
-        'direction': 'left',
-        'pad': {'r': 10, 't': 87},
-        'showactive': False,
-        'type': 'buttons',
-        'x': 0.1,
-        'xanchor': 'right',
-        'y': 0,
-        'yanchor': 'top',
-    }])
+        fig.add_trace(frames[0]['data'][0])
+        fig.frames = frames
 
-    fig.update_layout(title='Brute Force Animation', showlegend=False)
+        fig.update_layout(updatemenus=[{
+            'buttons': [
+                {
+                    'args': [None, {'frame': {'duration': 1500, 'redraw': True}, 'fromcurrent': True}],
+                    'label': 'Play',
+                    'method': 'animate',
+                },
+                {
+                    'args': [[None], {'frame': {'duration': 0, 'redraw': True}, 'mode': 'immediate', 'transition': {'duration': 0}}],
+                    'label': 'Pause',
+                    'method': 'animate',
+                },
+            ],
+            'direction': 'left',
+            'pad': {'r': 10, 't': 87},
+            'showactive': False,
+            'type': 'buttons',
+            'x': 0.1,
+            'xanchor': 'right',
+            'y': 0,
+            'yanchor': 'top',
+        }])
 
-    return fig
+        fig.update_layout(title='Brute Force Animation', showlegend=False)
 
+        return fig
 
-animation_fig = create_animation(convex_hull, next_point)
-
-animation_fig.show()
+    def __call__(self):
+        self.bruteForce()
+        animation_fig = self.create_animation()
+        return self.hull_points

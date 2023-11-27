@@ -70,6 +70,8 @@ class BruteForce:
         fig = make_subplots(rows=1, cols=1)
 
         frames = []
+        max_x, max_y = float('-inf'), float('-inf')
+
         for k in range(len(self.convex_hull) + 1):
             frame_points = []
             P = P0 = self.convex_hull[0][0]
@@ -77,11 +79,15 @@ class BruteForce:
 
             while current < k:
                 frame_points.append((P.X, P.Y))
+                max_x = max(max_x, P.X)
+                max_y = max(max_y, P.Y)
                 P = self.next_point[P]
                 current += 1
 
             if P != P0:
                 frame_points.append((P.X, P.Y))
+                max_x = max(max_x, P.X)
+                max_y = max(max_y, P.Y)
 
             frame_hull = [(P0.X, P0.Y)] + frame_points + [(P0.X, P0.Y)]
 
@@ -120,15 +126,19 @@ class BruteForce:
             'yanchor': 'top'
         }])
 
-        fig.show()
-        
+        fig.update_layout(xaxis=dict(range=[0, max_x + 2.5]), yaxis=dict(range=[0, max_y + 2.5]))
+
+        # fig.show()
+        return fig
+    
+
     def __call__(self):
         self.bruteForce()
-        animation_fig=self.create_animation()
-        return self.convex_hull
+        self.create_animation()
 
-np.random.seed(42)
-points = np.random.rand(20, 2)
 
-brute_force_solver = BruteForce(points=points)
-brute_force_solver()
+# np.random.seed(52)
+# points = np.random.rand(50, 2) * 5 + 5
+
+# brute_force_solver = BruteForce(points=points)
+# brute_force_solver()

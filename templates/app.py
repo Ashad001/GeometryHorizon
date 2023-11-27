@@ -195,14 +195,14 @@ def draw_convex_hull():
         fig = gs.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
     elif algo == "QuickHull":
-        qh =JarvisMarch(points=points)
+        qh = QuickHull(points=points)
         hull_points = qh()
         fig = qh.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
     elif algo == "Brute Force":
         bf = BruteForce(points=points)
         hull_points = bf()
-        fig = bf.create_animation()
+        fig = bf.plot_step_by_step()
         st.plotly_chart(fig, use_container_width=True)
         pass
     else:

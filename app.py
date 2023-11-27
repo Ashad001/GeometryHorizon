@@ -202,7 +202,7 @@ def draw_convex_hull():
     elif algo == "Brute Force":
         bf = BruteForce(points=points)
         hull_points = bf()
-        fig = bf.plot_step_by_step()
+        fig = bf.create_animation()
         st.plotly_chart(fig, use_container_width=True)
         pass
     else:

@@ -1,104 +1,115 @@
-import matplotlib.pyplot as plt
 import streamlit as st
-import plotly.graph_objects as go
+import numpy as np
 import plotly.express as px
-from .base import ConvexHull  
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from .base import ConvexHull
+import matplotlib.pyplot as plt
 
 class QuickHull(ConvexHull):
     def __init__(self, points=None, max_x=100, max_y=100):
-        super().__init__(points, max_x, max_y, len(points)if points is not None else None)
-        self.hull = []
-        self.hull_points = []
-        
-    def quickHull(self):
-        n = self.n
-        points = self.points
+        super().__init__(points, max_x, max_y, len(points) if points is not None else None)
+        self.hull = None
+        self.hull_points = None
+
+    def quickhull(self):
+        def find_hull(p, q, points):
+            if len(points) == 0:
+                return []
+            else:
+                farthest_point = max(points, key=lambda point: distance(p, q, point))
+                hull = find_hull(p, farthest_point, [point for point in points if orientation(p, farthest_point, point) == 1])
+                hull.extend([farthest_point])
+                hull.extend(find_hull(farthest_point, q, [point for point in points if orientation(farthest_point, q, point) == 1]))
+                return hull
 
         def distance(p, q, r):
-            return ((q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]))
+            return abs((q[1] - p[1]) * r[0] - (q[0] - p[0]) * r[1] + q[0] * p[1] - q[1] * p[0]) / np.sqrt((q[1] - p[1]) ** 2 + (q[0] - p[0]) ** 2)
 
-        def find_side(p1, p2, points):
-            # Find points on the left side of the line formed by p1 and p2
-            return [point for point in points if distance(p1, p2, point) > 0]
+        def orientation(p, q, r):
+            val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+            if val == 0:
+                return 0
+            return 1 if val > 0 else -1
 
-        def quick_hull_util(p1, p2, points, hull):
-            if not points:
-                return
-            
-            max_dist = -1
-            farthest_point = None
-
-            for point in points:
-                dist = distance(p1, p2, point)
-                if dist > max_dist:
-                    max_dist = dist
-                    farthest_point = point
-
-            hull.append(farthest_point)
-
-            points_left = find_side(p1, farthest_point, points)
-            points_right = find_side(farthest_point, p2, points)
-
-            quick_hull_util(p1, farthest_point, points_left, hull)
-            quick_hull_util(farthest_point, p2, points_right, hull)
-
-        if n < 3:
-            raise ValueError("n must be greater than 2")
-
-        min_point = min(points, key=lambda x: x[0])
-        max_point = max(points, key=lambda x: x[0])
-
-        hull = [min_point, max_point]
-
-        points_left = find_side(min_point, max_point, points)
-        points_right = find_side(max_point, min_point, points)
-
-        quick_hull_util(min_point, max_point, points_left, hull)
-        quick_hull_util(max_point, min_point, points_right, hull)
-
-        self.hull = hull
-        self.hull_points = hull
-        return hull
+        points = sorted(map(tuple, self.points), key=lambda x: x[0])  # Convert numpy arrays to tuples
+        hull = find_hull(points[0], points[-1], points)
+        hull.extend(find_hull(points[-1], points[0], points))
+        self.hull = list(set(map(tuple, hull)))  # Convert back to list after removing duplicates
+        return self.hull
 
     def plot(self, hull_points=None):
         if hull_points is None:
-            hull_points = self.hull_points
+            hull_points = self.hull
         plt.scatter(self.points[:, 0], self.points[:, 1])
         plt.plot([p[0] for p in hull_points], [p[1] for p in hull_points], "r")
         plt.show()
 
     def plot_step_by_step(self):
-        fig = go.Figure()
+        hull_points_list = self.hull
+        fig = make_subplots(rows=1, cols=1, specs=[[{"type": "scatter"}]])
+
+        scatter_trace = go.Scatter(
+            x=self.points[:, 0],
+            y=self.points[:, 1],
+            mode="markers",
+            name="Points",
+            marker=dict(color="blue"),
+        )
+        fig.add_trace(scatter_trace)
+
         frames = []
 
-        for i in range(len(self.hull)):
-            current_point = self.hull[i]
-            next_point = self.hull[(i + 1) % len(self.hull)]
+        for i in range(len(hull_points_list)):
+            hull_points = np.array(hull_points_list[:i + 1])
 
-            frame_data = [
-                go.Scatter(
-                    x=[p[0] for p in self.points],
-                    y=[p[1] for p in self.points],
-                    mode="markers",
-                    marker=dict(color="blue", size=10),
-                    showlegend=False,
-                ),
-                go.Scatter(
-                    x=[current_point[0], next_point[0]],
-                    y=[current_point[1], next_point[1]],
-                    mode="lines",
-                    line=dict(color="green"),
-                    showlegend=False,
-                ),
-            ]
+            scatter_frame = go.Frame(
+                data=[
+                    go.Scatter(
+                        x=self.points[:, 0],
+                        y=self.points[:, 1],
+                        mode="markers",
+                        name="Points",
+                    ),
+                    go.Scatter(
+                        x=hull_points[:, 0],
+                        y=hull_points[:, 1],
+                        mode="markers",
+                        name="Hull Points",
+                    ),
+                ],
+                name=f"Frame {i}",
+            )
+            frames.append(scatter_frame)
 
-            fig.add_trace(frame_data[0])
-            fig.add_trace(frame_data[1])
-
-            frames.append(go.Frame(data=frame_data, name=f"Frame {i + 1}"))
+            if len(hull_points) > 1:
+                hull_x = np.append(hull_points[:, 0], hull_points[0, 0])
+                hull_y = np.append(hull_points[:, 1], hull_points[0, 1])
+                hull_frame = go.Frame(
+                    data=[
+                        go.Scatter(
+                            x=hull_x,
+                            y=hull_y,
+                            mode="lines+markers",
+                            line=dict(color="green"),
+                            name="Convex Hull",
+                        ),
+                    ],
+                    name=f"Frame {i}_hull",
+                )
+                frames.append(hull_frame)
 
         fig.frames = frames
 
+        fig.update_layout(
+            title="Convex Hull Animation",
+            xaxis=dict(title="X-axis"),
+            yaxis=dict(title="Y-axis"),
+        )
+
+        animation_settings = dict(
+            frame=dict(duration=1000, redraw=True), fromcurrent=True
+        )
         fig.update_layout(
             updatemenus=[
                 dict(
@@ -108,36 +119,22 @@ class QuickHull(ConvexHull):
                         dict(
                             label="Play",
                             method="animate",
-                            args=[
-                                None,
-                                dict(
-                                    frame=dict(duration=500, redraw=True),
-                                    fromcurrent=False,
-                                ),
-                            ],
+                            args=[None, animation_settings],
                         )
                     ],
                 )
-            ],
-            sliders=[
-                dict(
-                    steps=[
-                        dict(args=["frame", dict(value=0)]),
-                        dict(args=["frame", dict(value=len(self.hull) - 1)]),
-                    ],
-                    active=0,
-                    pad=dict(t=0, l=0.1),
-                )
-            ],
+            ]
         )
 
         return fig
 
+    def visualize_quickhull(self):
+        fig = self.plot_step_by_step()
+        st.line_chart(fig)
     def __call__(self):
-        self.quickHull()
-        self.plot_step_by_step()
+        self.quickhull()
+        self.visualize_quickhull()
         return self.hull
-
 
 if __name__ == "__main__":
     qh = QuickHull()
